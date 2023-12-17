@@ -1,34 +1,16 @@
 public class Monitor {
-    private boolean ready = false;
-    private Provider provider = new Provider();
-    private Consumer consumer = new Consumer();
-
-    public void run() {
-        Thread providerThread = new Thread(this::providerTask);
-        Thread consumerThread = new Thread(this::consumerTask);
-
-        providerThread.start();
-        consumerThread.start();
+    private boolean ready;
+    public synchronized void provide(){
+        if (ready)
+            return;
+        ready = true;
+        System.out.println("provided");
+        notify();
     }
-
-    private void providerTask() {
-        try {
-            while (true) {
-                provider.provide();
-                Thread.sleep(1000); // Задержка в одну секунду
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void consumerTask() {
-        try {
-            while (true) {
-                consumer.consume();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public synchronized void consume() throws InterruptedException {
+        while(!ready)
+            wait();
+        ready = false;
+        System.out.println("consumed\n");
     }
 }
